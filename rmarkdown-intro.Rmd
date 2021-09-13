@@ -1,0 +1,31 @@
+---
+title: "rmarkdown_intro"
+author: "Lauren Yamane"
+date: "9/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Insert code chunks
+cmd + option + i
+cntrl + alt + i
+## R Markdown
+
+
+```{r start, echo = FALSE}
+y <- 3 * 3
+x <- y *3
+x
+y
+```
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
