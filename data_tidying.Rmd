@@ -1,0 +1,58 @@
+---
+title: "data_cleaning"
+author: "Lauren Yamane"
+date: "9/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message = FALSE}
+library(dplyr)
+library(tidyr)
+```
+## Data Sources
+
+Read in the data from [KNB](https://knb.ecoinformatics.org/view/df35b.304.2)
+```{r}
+catch_original <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
+glimpse(catch_original)
+```
+## Clean and reshape data
+
+* remove unnecessary columns
+* check column types
+* reshape data
+
+```{r}
+catch_data <- catch_original %>% 
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+
+# or select(-All, -notesRegCode)
+```
+
+## Join to regions definitions
+
+```{r}
+catch_clean <- catch_data %>% 
+  mutate(Chinook = as.numeric(Chinook))
+
+glimpse(catch_clean)
+```
+```{r}
+i <- which(is.na(catch_clean$Chinook))
+i
+
+# show row i of catch_original
+catch_original[i, ]
+```
+```{r}
+catch_clean <- catch_data %>%
+  mutate(Chinook = if_else(Chinook == "I", "1", Chinook)) %>%
+  mutate(Chinook = as.integer(Chinook))
+
+glimpse(catch_clean)
+```
+
