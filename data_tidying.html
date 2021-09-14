@@ -176,7 +176,19 @@ library(tidyr)</code></pre>
 <div id="data-sources" class="section level2">
 <h2>Data Sources</h2>
 <p>Read in the data from <a href="https://knb.ecoinformatics.org/view/df35b.304.2">KNB</a></p>
-<pre class="r"><code>catch_original &lt;- read.csv(&quot;https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1&quot;)</code></pre>
+<pre class="r"><code>catch_original &lt;- read.csv(&quot;https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1&quot;)
+glimpse(catch_original)</code></pre>
+<pre><code>## Rows: 1,708
+## Columns: 9
+## $ Region       &lt;chr&gt; &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;…
+## $ Year         &lt;int&gt; 1886, 1887, 1888, 1889, 1890, 1891, 1892, 1893, 1894, 189…
+## $ Chinook      &lt;chr&gt; &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5…
+## $ Sockeye      &lt;int&gt; 5, 155, 224, 182, 251, 274, 207, 189, 253, 408, 989, 791,…
+## $ Coho         &lt;int&gt; 0, 0, 16, 11, 42, 24, 11, 1, 5, 8, 192, 161, 132, 139, 84…
+## $ Pink         &lt;int&gt; 0, 0, 0, 92, 0, 0, 8, 187, 529, 606, 996, 2218, 673, 1545…
+## $ Chum         &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 1, 2, 0, 0, 0, 102…
+## $ All          &lt;int&gt; 5, 155, 240, 285, 292, 298, 226, 377, 788, 1026, 2181, 31…
+## $ notesRegCode &lt;chr&gt; &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;…</code></pre>
 </div>
 <div id="clean-and-reshape-data" class="section level2">
 <h2>Clean and reshape data</h2>
@@ -185,9 +197,79 @@ library(tidyr)</code></pre>
 <li>check column types</li>
 <li>reshape data</li>
 </ul>
+<pre class="r"><code>catch_data &lt;- catch_original %&gt;% 
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+
+# or select(-All, -notesRegCode)</code></pre>
+<pre class="r"><code>catch_clean &lt;- catch_data %&gt;% 
+  mutate(Chinook = as.numeric(Chinook))</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Chinook`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Chinook` is `as.numeric(Chinook)`.</code></pre>
+<pre><code>## Warning in mask$eval_all_mutate(dots[[i]]): NAs introduced by coercion</code></pre>
+<pre class="r"><code>glimpse(catch_clean)</code></pre>
+<pre><code>## Rows: 1,708
+## Columns: 7
+## $ Region  &lt;chr&gt; &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;,…
+## $ Year    &lt;int&gt; 1886, 1887, 1888, 1889, 1890, 1891, 1892, 1893, 1894, 1895, 18…
+## $ Chinook &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 5, 9, 12, 0, 3, 4, 0, 4, 9, 3…
+## $ Sockeye &lt;int&gt; 5, 155, 224, 182, 251, 274, 207, 189, 253, 408, 989, 791, 708,…
+## $ Coho    &lt;int&gt; 0, 0, 16, 11, 42, 24, 11, 1, 5, 8, 192, 161, 132, 139, 84, 107…
+## $ Pink    &lt;int&gt; 0, 0, 0, 92, 0, 0, 8, 187, 529, 606, 996, 2218, 673, 1545, 204…
+## $ Chum    &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 1, 2, 0, 0, 0, 102, 343…</code></pre>
+<pre class="r"><code>i &lt;- which(is.na(catch_clean$Chinook))
+i</code></pre>
+<pre><code>## [1] 401</code></pre>
+<pre class="r"><code># show row i of catch_original
+catch_original[i, ]</code></pre>
+<pre><code>##     Region Year Chinook Sockeye Coho Pink Chum All notesRegCode
+## 401    GSE 1955       I      66    0    0    1  68</code></pre>
+<pre class="r"><code>catch_clean &lt;- catch_data %&gt;%
+  mutate(Chinook = if_else(Chinook == &quot;I&quot;, &quot;1&quot;, Chinook)) %&gt;%
+  mutate(Chinook = as.integer(Chinook))
+
+glimpse(catch_clean)</code></pre>
+<pre><code>## Rows: 1,708
+## Columns: 7
+## $ Region  &lt;chr&gt; &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;, &quot;SSE&quot;,…
+## $ Year    &lt;int&gt; 1886, 1887, 1888, 1889, 1890, 1891, 1892, 1893, 1894, 1895, 18…
+## $ Chinook &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 5, 9, 12, 0, 3, 4, 0, 4, 9, 3…
+## $ Sockeye &lt;int&gt; 5, 155, 224, 182, 251, 274, 207, 189, 253, 408, 989, 791, 708,…
+## $ Coho    &lt;int&gt; 0, 0, 16, 11, 42, 24, 11, 1, 5, 8, 192, 161, 132, 139, 84, 107…
+## $ Pink    &lt;int&gt; 0, 0, 0, 92, 0, 0, 8, 187, 529, 606, 996, 2218, 673, 1545, 204…
+## $ Chum    &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 1, 2, 0, 0, 0, 102, 343…</code></pre>
+<p>reshape data</p>
+<pre class="r"><code>catch_long &lt;- catch_clean %&gt;%
+  pivot_longer(cols = -c(Region, Year), names_to = &quot;species&quot;, values_to = &quot;catch&quot;)</code></pre>
+<pre class="r"><code>catch_wide &lt;- catch_long %&gt;%
+  pivot_wider(names_from = Region, values_from = catch)</code></pre>
+<pre class="r"><code>catch_long &lt;- catch_long %&gt;% 
+  rename(catch_thousands = catch) %&gt;%
+  mutate(catch = catch_thousands * 1000)</code></pre>
+<p>group and summarise data</p>
+<pre class="r"><code>mean_region &lt;- catch_long %&gt;%
+  group_by(Region) %&gt;%
+  summarise(catch_mean = mean(catch))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>sum_year &lt;- catch_long %&gt;%
+  group_by(Year) %&gt;%
+  summarise(catch_sum_yr = sum(catch))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 </div>
 <div id="join-to-regions-definitions" class="section level2">
 <h2>Join to regions definitions</h2>
+<pre class="r"><code>region_defs &lt;- read.csv(&quot;https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1&quot;) %&gt;% 
+    select(code, mgmtArea)
+
+head(region_defs)</code></pre>
+<pre><code>##      code                                  mgmtArea
+## 1     GSE              Unallocated Southeast Alaska
+## 2     NSE                 Northern Southeast Alaska
+## 3     SSE                 Southern Southeast Alaska
+## 4     YAK                                   Yakutat
+## 5 PWSmgmt      Prince William Sound Management Area
+## 6     BER Bering River Subarea Copper River Subarea</code></pre>
+<pre class="r"><code>catch_joined &lt;- left_join(catch_long, region_defs, by = c(&quot;Region&quot;=&quot;code&quot;))</code></pre>
 </div>
 
 

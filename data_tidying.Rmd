@@ -33,8 +33,6 @@ catch_data <- catch_original %>%
 # or select(-All, -notesRegCode)
 ```
 
-## Join to regions definitions
-
 ```{r}
 catch_clean <- catch_data %>% 
   mutate(Chinook = as.numeric(Chinook))
@@ -55,4 +53,41 @@ catch_clean <- catch_data %>%
 
 glimpse(catch_clean)
 ```
+reshape data
+```{r}
+catch_long <- catch_clean %>%
+  pivot_longer(cols = -c(Region, Year), names_to = "species", values_to = "catch")
+```
+```{r}
+catch_wide <- catch_long %>%
+  pivot_wider(names_from = Region, values_from = catch)
+```
+```{r}
+catch_long <- catch_long %>% 
+  rename(catch_thousands = catch) %>%
+  mutate(catch = catch_thousands * 1000)
+
+```
+group and summarise data
+
+```{r}
+mean_region <- catch_long %>%
+  group_by(Region) %>%
+  summarise(catch_mean = mean(catch))
+
+sum_year <- catch_long %>%
+  group_by(Year) %>%
+  summarise(catch_sum_yr = sum(catch))
+```
+## Join to regions definitions
+```{r}
+region_defs <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+    select(code, mgmtArea)
+
+head(region_defs)
+```
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by = c("Region"="code"))
+```
+
 
