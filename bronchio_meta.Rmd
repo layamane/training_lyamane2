@@ -1,0 +1,28 @@
+---
+title: "bronchial_meta"
+author: "Lauren Yamane"
+date: "9/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#library(tidyverse)
+library(metafor)
+
+```
+
+```{r}
+bronchio <- read.csv("https://figshare.com/ndownloader/files/14460386")
+```
+```{r effects_size}
+effect_size_data <- escalc(measure = "MD", m1i= Mc, sd1i= Sc, n1i=Nc, m2i= Me, sd2i= Se, n2i= Ne, data = bronchio,  append = TRUE)
+```
+```{r}
+res1 <- rma(yi = yi, sei = vi, method = "ML", test = "knha", control=list(stepadj=0.5), data = effect_size_data)
+
+summary(res1)
+```
+
+
+
